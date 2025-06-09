@@ -1,0 +1,14 @@
+name: speech_to_text_flutter
+description: A Flutter app for real-time voice-to-text with Azure Speech.
+version: 1.0.0
+environment:
+  sdk: '>=2.17.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  socket_io_client: ^2.0.3
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  uses-material-design: true

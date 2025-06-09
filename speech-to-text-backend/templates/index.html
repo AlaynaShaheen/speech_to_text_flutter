@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+   <html lang="en">
+   <head>
+       <meta charset="UTF-8">
+       <title>Real-Time Voice to Text</title>
+       <script src="https://cdn.socket.io/3.1.3/socket.io.min.js"></script>
+       <style>
+           #transcription {
+               margin: 20px;
+               padding: 10px;
+               border: 1px solid #ccc;
+               border-radius: 5px;
+               min-height: 100px;
+               white-space: pre-wrap;
+           }
+       </style>
+   </head>
+   <body>
+       <h1>Real-Time Voice to Text with Azure Speech</h1>
+       <button id="startStopBtn" onclick="toggleRecognition()">Start Recognition</button>
+       <div id="status">Click "Start Recognition" to begin.</div>
+       <div id="transcription"></div>
+
+       <script>
+           const socket = io('http://localhost:5000');
+           const startStopBtn = document.getElementById('startStopBtn');
+           const statusDiv = document.getElementById('status');
+           const transcriptionDiv = document.getElementById('transcription');
+           let isRecognizing = false;
+
+           socket.on('connect', () => {
+               statusDiv.textContent = 'Connected to server';
+               console.log('Connected');
+           });
+
+           socket.on('disconnect', () => {
+               statusDiv.textContent = 'Disconnected from server';
+               console.log('Disconnected');
+           });
+
+           socket.on('transcription', (data) => {
+               console.log('Received transcription:', data);
+               if (data.type === 'transcription' && data.text) {
+                   if (transcriptionDiv.textContent.trim() === '' || data.append) {
+                       transcriptionDiv.textContent += (transcriptionDiv.textContent ? ' ' : '') + data.text;
+                   } else {
+                       transcriptionDiv.textContent = data.text;
+                   }
+                   transcriptionDiv.scrollTop = transcriptionDiv.scrollHeight;
+               }
+           });
+
+           socket.on('status', (data) => {
+               console.log('Received status:', data);
+               if (data.type === 'status') {
+                   isRecognizing = data.isRecognizing;
+                   statusDiv.textContent = data.message || (isRecognizing ? 'Recognizing...' : 'Ready');
+                   startStopBtn.textContent = isRecognizing ? 'Stop Recognition' : 'Start Recognition';
+                   transcriptionDiv.contentEditable = !isRecognizing;
+                   transcriptionDiv.style.border = isRecognizing ? 'none' : '1px solid #ccc';
+               }
+           });
+
+           function toggleRecognition() {
+               if (isRecognizing) {
+                   socket.emit('stop_recognition');
+               } else {
+                   socket.emit('start_recognition');
+               }
+           }
+       </script>
+   </body>
+   </html>

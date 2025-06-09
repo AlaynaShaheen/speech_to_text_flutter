@@ -1,0 +1,6 @@
+flask==2.3.3
+flask-socketio==5.3.4
+azure-cognitiveservices-speech==1.37.0
+gevent==24.2.1
+python-socketio==5.11.4
+
